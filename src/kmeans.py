@@ -35,7 +35,8 @@ class KMeans:
             self.labels[idx] = label
             self.count[label] += 1
 
-    def run(self):
+    def converge(self):
+        eps = 0.0001
         self.updateLabels()
 
         center = [0 for i in range(self.m)]
@@ -45,7 +46,14 @@ class KMeans:
             for i in range(self.m):
                 s[label][i]+= (item[i]/self.count[label])
 
+        s = sorted(s)
+        result = True
+        for x,y in zip(s,self.centroids):
+            if x[0] - y[0] > eps or x[1] - y[1] > eps:
+                result = False
+
         self.centroids = s
+        return result
 
     def calcMaximumDistance(self):
         result = 0
@@ -57,7 +65,7 @@ class KMeans:
 
     def solve(self):
         self.centroids = self.pickRandomCentroids()
-        for i in range(0,10):
-            self.run()
+        while not self.converge():
+            pass
         return {"labels" : self.labels,
                 "maximum distance" : self.calcMaximumDistance()}

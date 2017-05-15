@@ -40,14 +40,32 @@ def draw(data,label):
     ax.set_xlabel('X')
     plt.show()
 
+# Setting
+number_of_iteration = 100
+print_raw_data = False
+number_of_clusters = 3
+
+
+# Main Procedure
 if __name__ == "__main__":
     data,label = readData()
-    # draw(data,label)
+    if print_raw_data:
+        draw(data,label)
+
     ans = {'maximum distance':9999,"labels":[]}
     maxDistance = getItem('maximum distance')
-    for i in range(100):
-        result = KMeans(data,3,distance).solve()
+    avg,maximum_max_distance = 0,0
+
+    for i in range(number_of_iteration):
+        result = KMeans(data,number_of_clusters,distance).solve()
+        avg += maxDistance(result)
         if(maxDistance(ans) > maxDistance(result)):
             ans = result
-    print(ans)
+        if(maxDistance(result) > maximum_max_distance):
+            maximum_max_distance = maxDistance(result)
+
+    avg /= number_of_iteration
+    print("Minimum max distance:",maxDistance(ans))
+    print("Maximum max distance:",maximum_max_distance)
+    print("Average max distance:",avg)
     draw(data,ans['labels'])
