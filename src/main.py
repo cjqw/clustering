@@ -43,8 +43,8 @@ def draw(data,label):
 # Setting
 number_of_iteration = 100
 print_raw_data = False
-number_of_clusters = 3
-
+number_of_clusters = 4
+print_the_result = True
 
 # Main Procedure
 if __name__ == "__main__":
@@ -68,4 +68,5 @@ if __name__ == "__main__":
     print("Minimum max distance:",maxDistance(ans))
     print("Maximum max distance:",maximum_max_distance)
     print("Average max distance:",avg)
-    draw(data,ans['labels'])
+    if print_the_result:
+        draw(data,ans['labels'])
