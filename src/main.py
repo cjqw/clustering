@@ -2,11 +2,20 @@
 
 import numpy as np
 from math import *
-from kmeans import KMeans
+from core.kmeans import KMeans
+from core.spectral import SpectralClustering
 from util.util import *
 
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+
+
+# Setting
+number_of_iteration = 10
+print_raw_data = False
+number_of_clusters = 2
+print_the_result = True
+
 
 def parseLine(line):
     dims = line.split(',')
@@ -17,47 +26,45 @@ def readData():
     with open(inputFile,'r') as fin:
         lines = fin.readlines()[1:]
     result = mapv(parseLine,lines)
-    return mapv(getItem(0),result), mapv(getItem(1),result)
+    return mapv(getValue(0),result), mapv(getValue(1),result)
 
 def distance(x,y):
     return sqrt((x[0]-y[0])**2
                 +(x[1]-y[1])**2
                 +(x[2]-y[2])**2)
 
-def draw(data,label):
-    model = partition(list(zip(data,label)),getItem(1))
-    ax=plt.subplot(111,projection='3d')
+def affinity(x,y):
+    return np.exp(-np.linalg.norm(x-y))
+
+def draw3D(data,label,name = ""):
+    model = partition(list(zip(data,label)),getValue(1))
+    ax = plt.subplot(111,projection='3d')
 
     for label in model:
-        position = mapv(getItem(0),model[label])
-        xs = mapv(getItem(0),position)
-        ys = mapv(getItem(1),position)
-        zs = mapv(getItem(2),position)
+        position = mapv(getValue(0),model[label])
+        xs = mapv(getValue(0),position)
+        ys = mapv(getValue(1),position)
+        zs = mapv(getValue(2),position)
         ax.scatter(xs,ys,zs)
-
     ax.set_zlabel('Z')
     ax.set_ylabel('Y')
     ax.set_xlabel('X')
     plt.show()
 
-# Setting
-number_of_iteration = 100
-print_raw_data = False
-number_of_clusters = 4
-print_the_result = True
+def printDistance(minimumd,maximumd,averaged):
+    print("Minimum max distance:",minimumd)
+    print("Maximum max distance:",maximumd)
+    print("Average max distance:",averaged)
 
-# Main Procedure
-if __name__ == "__main__":
-    data,label = readData()
-    if print_raw_data:
-        draw(data,label)
+def testModel(model,distance,name = ""):
+    global data,label
 
     ans = {'maximum distance':9999,"labels":[]}
-    maxDistance = getItem('maximum distance')
+    maxDistance = getValue('maximum distance')
     avg,maximum_max_distance = 0,0
 
     for i in range(number_of_iteration):
-        result = KMeans(data,number_of_clusters,distance).solve()
+        result = model(data,number_of_clusters,distance).solve()
         avg += maxDistance(result)
         if(maxDistance(ans) > maxDistance(result)):
             ans = result
@@ -65,8 +72,18 @@ if __name__ == "__main__":
             maximum_max_distance = maxDistance(result)
 
     avg /= number_of_iteration
-    print("Minimum max distance:",maxDistance(ans))
-    print("Maximum max distance:",maximum_max_distance)
-    print("Average max distance:",avg)
+    printDistance(maxDistance(ans),maximum_max_distance,avg)
     if print_the_result:
-        draw(data,ans['labels'])
+        draw3D(data,ans['labels'])
+
+def testKMeans():
+    testModel(KMeans,distance)
+
+def testSpectralClustering():
+    testModel(SpectralClustering,affinity)
+
+if __name__ == "__main__":
+    data,label = readData()
+    if print_raw_data:
+        draw3D(data,label)
+    testSpectralClustering()
