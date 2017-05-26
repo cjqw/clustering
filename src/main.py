@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 # Setting
-number_of_iteration = 10
+number_of_iteration = 1
 print_raw_data = False
 number_of_clusters = 2
 print_the_result = True
@@ -27,6 +27,23 @@ def readData():
         lines = fin.readlines()[1:]
     result = mapv(parseLine,lines)
     return mapv(getValue(0),result), mapv(getValue(1),result)
+
+def parseRingDataLine(line):
+    st = line[:-1].split(' ')
+    result = []
+    for piece in st:
+        try:
+            result.append(float(piece))
+        except:
+            pass
+    return result
+
+
+def readRingData():
+    inputFile = 'data/ring-data.txt'
+    with open(inputFile,'r')as fin:
+        lines = fin.readlines()
+    return mapv(parseRingDataLine,lines)
 
 def distance(x,y):
     return sqrt((x[0]-y[0])**2
@@ -52,14 +69,22 @@ def draw3D(data,label,name = ""):
     ax.set_xlabel('X')
     plt.show()
 
+def draw2D(data,label,name=""):
+    model = partition(list(zip(data,label)),getValue(1))
+    for label in model:
+        position = mapv(getValue(0),model[label])
+        x = mapv(getValue(0),position)
+        y = mapv(getValue(1),position)
+        plt.scatter(x,y)
+    plt.title(name)
+    plt.show()
+
 def printDistance(minimumd,maximumd,averaged):
     print("Minimum max distance:",minimumd)
     print("Maximum max distance:",maximumd)
     print("Average max distance:",averaged)
 
-def testModel(model,distance):
-    global data,label
-
+def testModel(data,model,distance):
     ans = {'maximum distance':9999,"labels":[]}
     maxDistance = getValue('maximum distance')
     avg,maximum_max_distance = 0,0
@@ -77,21 +102,20 @@ def testModel(model,distance):
     return ans['labels']
 
 def testKMeans():
-    global data
-    labels = testModel(KMeans,distance)
-    if print_the_result:
-        draw3D(data,labels,"K-Means")
-
-
-def testSpectralClustering():
-    global data
-    labels = testModel(SpectralClustering,affinity)
-    if print_the_result:
-        draw3D(data,labels,"Spectral Clustring")
-
-
-if __name__ == "__main__":
     data,label = readData()
     if print_raw_data:
         draw3D(data,label)
+
+    labels = testModel(data,KMeans,distance)
+    if print_the_result:
+        draw3D(data,labels,"K-Means")
+
+def testSpectralClustering():
+    data = readRingData()
+    labels = testModel(data,SpectralClustering,affinity)
+    if print_the_result:
+        draw2D(data,labels,"Spectral Clustring")
+
+
+if __name__ == "__main__":
     testSpectralClustering()
