@@ -46,6 +46,7 @@ def draw3D(data,label,name = ""):
         ys = mapv(getValue(1),position)
         zs = mapv(getValue(2),position)
         ax.scatter(xs,ys,zs)
+    ax.set_title(name)
     ax.set_zlabel('Z')
     ax.set_ylabel('Y')
     ax.set_xlabel('X')
@@ -56,7 +57,7 @@ def printDistance(minimumd,maximumd,averaged):
     print("Maximum max distance:",maximumd)
     print("Average max distance:",averaged)
 
-def testModel(model,distance,name = ""):
+def testModel(model,distance):
     global data,label
 
     ans = {'maximum distance':9999,"labels":[]}
@@ -73,14 +74,21 @@ def testModel(model,distance,name = ""):
 
     avg /= number_of_iteration
     printDistance(maxDistance(ans),maximum_max_distance,avg)
-    if print_the_result:
-        draw3D(data,ans['labels'])
+    return ans['labels']
 
 def testKMeans():
-    testModel(KMeans,distance)
+    global data
+    labels = testModel(KMeans,distance)
+    if print_the_result:
+        draw3D(data,labels,"K-Means")
+
 
 def testSpectralClustering():
-    testModel(SpectralClustering,affinity)
+    global data
+    labels = testModel(SpectralClustering,affinity)
+    if print_the_result:
+        draw3D(data,labels,"Spectral Clustring")
+
 
 if __name__ == "__main__":
     data,label = readData()
