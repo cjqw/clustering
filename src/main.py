@@ -51,7 +51,7 @@ def distance(x,y):
                 +(x[2]-y[2])**2)
 
 def affinity(x,y):
-    return np.exp(-np.linalg.norm(x-y))
+    return np.exp(-np.square(np.linalg.norm(x-y)))
 
 def draw3D(data,label,name = ""):
     model = partition(list(zip(data,label)),getValue(1))
